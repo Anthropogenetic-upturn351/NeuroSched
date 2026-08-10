@@ -1,12 +1,12 @@
 #!/bin/bash
 # NeuroSched Boot and Verification Test
-LOGFILE="/neurosched/build/serial.log"
+LOGFILE="/tmp/serial.log"
 rm -f "$LOGFILE"
 
 echo "[boot-test] Launching NeuroSched kernel in QEMU..."
 
 timeout 45 qemu-system-i386 \
-  -kernel /neurosched/build/kernel.elf \
+  -kernel /neurosched/build/neurosched.elf \
   -serial file:"$LOGFILE" \
   -display none \
   -no-reboot \
