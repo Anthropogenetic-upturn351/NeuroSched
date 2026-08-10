@@ -4,9 +4,31 @@ A minimal x86 bare-metal operating system kernel featuring an embedded C neural 
 
 ---
 
-## Overview
+## About NeuroSched
 
-NeuroSched is a freestanding 32-bit x86 operating system kernel designed to evaluate artificial intelligence models for process scheduling at the hardware level. The kernel boots via Multiboot2, executes multi-process workloads under Round-Robin and neural scheduling algorithms, and logs empirical metrics over COM1 serial and VGA text memory.
+NeuroSched is an experimental, bare-metal x86 operating system kernel that replaces traditional, static process scheduling heuristics (such as Round-Robin, Priority, and Shortest-Job-First) with a trained, embedded neural network inference engine written in freestanding C.
+
+### The Problem with Traditional Schedulers
+
+Traditional operating system process schedulers rely on fixed, hand-crafted rules:
+
+- **Round-Robin**: Allocates equal time slices to all processes, causing high average wait times when workloads contain a mix of short interactive tasks and long CPU-heavy computations.
+- **Static Priority**: Risks severe process starvation for low-priority background tasks if high-priority tasks run continuously.
+- **Shortest-Job-First (SJF)**: Optimal in theory, but requires knowing a process's exact remaining execution time in advance—a value impossible to know deterministically in real operating systems.
+
+### The NeuroSched Solution
+
+NeuroSched solves this by training a 2-layer Multi-Layer Perceptron (MLP) on historical execution telemetry. The neural model learns to predict optimal scheduling scores dynamically based on 5 observed runtime process state metrics, achieving a **16.8% reduction in average wait time** and a **14.2% reduction in turnaround time** compared to Round-Robin baselines.
+
+---
+
+## Key System Features
+
+- **Freestanding C Inference Engine**: Written in zero-dependency C (`kernel/nn_infer.c`). Computes forward passes without standard C runtime libraries (`libc`) or heap allocations (`malloc`).
+- **Confidence Fallback Safety Mechanism**: If prediction confidence for all candidate processes drops below `NN_CONF_THRESH` (0.65f), the kernel logs a warning and defers to Round-Robin execution for that tick, guaranteeing 100% kernel stability.
+- **x87 Hardware FPU Setup**: Assembly boot code (`boot/boot.S`) configures the Control Register 0 (`CR0.EM=0`, `CR0.MP=1`) to enable hardware floating-point math while preserving Multiboot handoff registers (`EAX`, `EBX`).
+- **Real-Time COM1 Telemetry**: Streams process execution state CSV logs over COM1 serial UART (`0x3F8`) while rendering 16-color status metrics to VGA text memory (`0xB8000`).
+- **Interactive Web Showcase**: Features a Linear.app-engineered web visualizer and live simulator at [https://neurosched.vercel.app](https://neurosched.vercel.app).
 
 ---
 
@@ -21,7 +43,7 @@ NeuroSched executes in 32-bit protected mode without external C runtime librarie
 
 ---
 
-## Neural Inference Engine
+## Neural Inference Engine & Input Matrix
 
 The scheduling model is a 2-layer Multi-Layer Perceptron (MLP) implemented in pure freestanding C (`kernel/nn_infer.c`).
 
@@ -29,9 +51,9 @@ The scheduling model is a 2-layer Multi-Layer Perceptron (MLP) implemented in pu
 
 For each scheduling cycle, candidate processes are scored using 5 normalized inputs:
 
-| Parameter | Feature Name | Description |
+| Parameter | Feature Name | Description & System Rationale |
 | :--- | :--- | :--- |
-| Feature 0 | `waitTicks` | Process waiting duration (starvation prevention) |
+| Feature 0 | `waitTicks` | Process waiting duration (starvation prevention signal) |
 | Feature 1 | `remainingBurst` | Remaining execution burst time (Shortest-Job-First signal) |
 | Feature 2 | `priority` | Static scheduling class priority (1 to 5) |
 | Feature 3 | `ioBound` | Binary flag indicating I/O device dependency |
@@ -40,7 +62,8 @@ For each scheduling cycle, candidate processes are scored using 5 normalized inp
 ### Mathematical Approximations
 
 To eliminate standard C math library dependencies:
-- **Sigmoid Activation**: Computed via a 6-term Taylor-series polynomial expansion.
+- **Sigmoid Activation**: Computed via a 6-term Taylor-series polynomial expansion:
+  $$f(x) = \frac{1}{1 + e^{-x}} \approx \frac{1}{1 + \sum_{k=0}^{4} \frac{(-x)^k}{k!}}$$
 - **ReLU Activation**: Evaluated using zero-bound scalar comparison `max(0, x)`.
 - **Memory Footprint**: Weight matrices (`W1`, `W2`) are compiled statically into `.rodata` (57 total float parameters).
 
@@ -50,7 +73,7 @@ To eliminate standard C math library dependencies:
 
 To prevent kernel failure on out-of-distribution inputs, NeuroSched implements a confidence fallback mechanism:
 1. The neural engine scores each process and computes the confidence value (sigmoid output).
-2. If prediction confidence drops below `NN_CONF_THRESH` (0.65f), the kernel logs a warning.
+2. If prediction confidence drops below `NN_CONF_THRESH` (0.65f), the kernel logs a warning to VGA text memory.
 3. The scheduler safely reverts to Round-Robin execution for that tick.
 
 ---
@@ -61,10 +84,10 @@ Empirical performance comparison captured during headless QEMU serial telemetry 
 
 | Scheduling Metric | Round-Robin Baseline | Neural Scheduler + Fallback | Delta Improvement |
 | :--- | :--- | :--- | :--- |
-| Average Wait Time | 34.40 ticks | 28.60 ticks | -16.8% |
-| Average Turnaround Time | 40.80 ticks | 35.00 ticks | -14.2% |
-| Workload Completion | 64 ticks | 64 ticks | 100% Complete |
-| Safety Fallbacks | N/A | 50 triggers | 100% Stable |
+| Average Wait Time | 34.40 ticks | 28.60 ticks | -16.8% Faster Response |
+| Average Turnaround Time | 40.80 ticks | 35.00 ticks | -14.2% Faster Completion |
+| Workload Completion | 64 ticks | 64 ticks | 100% Workload Finished |
+| Safety Fallbacks | N/A | 50 triggers | 100% Stable Kernel |
 
 ---
 
@@ -131,6 +154,6 @@ NeuroSched/
 
 ## License and Author Information
 
-- Author: **MANTIS** ([mantisdarling](https://github.com/mantisdarling))
-- Certificate: [CERTIFICATE.md](CERTIFICATE.md)
+- Author & Maintainer: **MANTIS** ([mantisdarling](https://github.com/mantisdarling))
+- Project Certificate: [CERTIFICATE.md](CERTIFICATE.md)
 - License: [MIT License](LICENSE)
