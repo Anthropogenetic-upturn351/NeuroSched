@@ -1,23 +1,45 @@
-import React from 'react';
-import { Award, CheckCircle2, TrendingUp, ShieldAlert } from 'lucide-react';
+import React, { useState } from 'react';
+import { Award, TrendingUp, ShieldAlert, FileText, Check } from 'lucide-react';
+import BenchmarkChart from './BenchmarkChart';
+import CpuCoreVisualizer from './CpuCoreVisualizer';
 
 export default function Benchmarks() {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPDF = () => {
+    setDownloading(true);
+    setTimeout(() => {
+      window.print();
+      setDownloading(false);
+    }, 500);
+  };
+
   return (
     <section id="benchmarks" className="py-16 px-4 lg:px-8 border-b border-[#333333] bg-[#111111]">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-10">
         
         {/* Section Header */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 font-mono text-xs text-[#FF5A00] uppercase tracking-wider font-semibold">
-            <Award className="w-3.5 h-3.5" />
-            <span>Verified QEMU Benchmarks</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 font-mono text-xs text-[#FF5A00] uppercase tracking-wider font-semibold">
+              <Award className="w-3.5 h-3.5" />
+              <span>Verified QEMU Benchmarks & Hardware Telemetry</span>
+            </div>
+            <h2 className="text-3xl font-extrabold text-[#EAEAEA]">
+              Empirical Metric Outcomes
+            </h2>
+            <p className="text-xs text-[#888888] max-w-2xl">
+              Real benchmark output captured directly over QEMU COM1 serial UART port during dual-phase kernel execution.
+            </p>
           </div>
-          <h2 className="text-3xl font-extrabold text-[#EAEAEA]">
-            Empirical Metric Outcomes
-          </h2>
-          <p className="text-xs text-[#888888] max-w-2xl">
-            Real benchmark output captured directly over QEMU COM1 serial UART port during dual-phase kernel execution.
-          </p>
+
+          <button
+            onClick={handleDownloadPDF}
+            className="flex items-center gap-2 bg-[#FF5A00] hover:bg-[#E04F00] text-black font-mono font-bold text-xs px-4 py-2.5 transition-all shadow-[0_0_20px_rgba(255,90,0,0.3)] self-start md:self-auto"
+          >
+            {downloading ? <Check className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+            <span>{downloading ? 'GENERATING PRINT REPORT...' : 'EXPORT BENCHMARK PDF REPORT'}</span>
+          </button>
         </div>
 
         {/* Metric Cards Grid */}
@@ -64,6 +86,12 @@ export default function Benchmarks() {
             </div>
           </div>
         </div>
+
+        {/* Interactive Metric Comparison Chart */}
+        <BenchmarkChart />
+
+        {/* Hardware CPU Core Visualizer */}
+        <CpuCoreVisualizer />
 
         {/* Detailed Benchmark Comparison Table */}
         <div className="carbon-card p-6 space-y-4">
