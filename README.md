@@ -1,5 +1,7 @@
 # NeuroSched
 
+[![Live Showcase](https://img.shields.io/badge/Live-Showcase%20App-FF5A00?style=for-the-badge&logo=vercel)](https://neurosched.vercel.app)
+
 **A minimal x86 operating system where a trained neural network replaces the traditional process scheduler.**
 
 NeuroSched boots via GRUB/Multiboot2 on real x86 hardware (and QEMU), runs a synthetic multi-process workload under two scheduling strategies — round-robin and a neural-network-driven scheduler — and prints a live side-by-side comparison of scheduling metrics directly to the VGA text buffer.
