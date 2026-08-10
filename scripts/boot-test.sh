@@ -6,8 +6,8 @@ rm -f "$LOGFILE"
 echo "[boot-test] Launching NeuroSched kernel in QEMU..."
 echo "==================== SERIAL LOG OUTPUT ===================="
 
-timeout 20 stdbuf -o0 -e0 qemu-system-i386 \
-  -kernel /neurosched/build/kernel.elf \
+timeout 20 qemu-system-i386 \
+  -kernel /neurosched/build/kernel_v2.elf \
   -serial stdio \
   -display none \
   -no-reboot \
