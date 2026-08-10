@@ -145,7 +145,9 @@ NeuroSched/
 │   └── boot-test.sh       # QEMU execution test script
 ├── website/               # Showcase web application
 ├── CERTIFICATE.md         # Official project certificate
+├── CONTRIBUTING.md        # Contribution guidelines
 ├── LICENSE                # MIT License terms
+├── SECURITY.md            # Security policy
 ├── linker.ld              # Linker script for 1 MB physical load address
 └── Makefile               # Kernel build automation
 ```
@@ -156,4 +158,6 @@ NeuroSched/
 
 - Author & Maintainer: **MANTIS** ([mantisdarling](https://github.com/mantisdarling))
 - Project Certificate: [CERTIFICATE.md](CERTIFICATE.md)
+- Contributing Guidelines: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Security Policy: [SECURITY.md](SECURITY.md)
 - License: [MIT License](LICENSE)

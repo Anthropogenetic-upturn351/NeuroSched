@@ -35,6 +35,24 @@ export default function Footer() {
           </a>
           <span className="text-[#333333]">|</span>
           <a
+            href="https://github.com/mantisdarling/NeuroSched/blob/main/CONTRIBUTING.md"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-[#FF5A00] transition-colors"
+          >
+            Contributing
+          </a>
+          <span className="text-[#333333]">|</span>
+          <a
+            href="https://github.com/mantisdarling/NeuroSched/blob/main/SECURITY.md"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-[#FF5A00] transition-colors"
+          >
+            Security Policy
+          </a>
+          <span className="text-[#333333]">|</span>
+          <a
             href="https://github.com/mantisdarling/NeuroSched/blob/main/LICENSE"
             target="_blank"
             rel="noreferrer"
