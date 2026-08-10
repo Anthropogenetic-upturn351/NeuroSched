@@ -2,8 +2,6 @@
 
 A minimal x86 bare-metal operating system kernel featuring an embedded C neural network process scheduler.
 
-**[Project Info](INFO.md)** | **[Contributing](CONTRIBUTING.md)** | **[Security Policy](SECURITY.md)** | **[MIT License](LICENSE)** | **[Web Showcase](https://neurosched.vercel.app)**
-
 ---
 
 ## About NeuroSched
