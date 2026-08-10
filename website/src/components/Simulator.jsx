@@ -175,7 +175,12 @@ export default function Simulator() {
             max="0.90"
             step="0.05"
             value={threshold}
-            onChange={(e) => setThreshold(parseFloat(e.target.value))}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              if (!isNaN(val)) {
+                setThreshold(Math.min(Math.max(val, 0.50), 0.90));
+              }
+            }}
             className="w-full h-2 bg-[#111111] accent-[#FF5A00] cursor-pointer"
           />
 
