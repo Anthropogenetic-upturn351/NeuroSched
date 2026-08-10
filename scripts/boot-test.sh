@@ -1,36 +1,24 @@
 #!/bin/bash
-# NeuroSched boot test — captures serial output reliably
-# Uses Unix domain socket with 'wait': QEMU holds the kernel until nc connects,
-# so no serial bytes are lost.
+# NeuroSched Boot and Verification Test
+LOGFILE="/neurosched/build/serial.log"
+rm -f "$LOGFILE"
 
-rm -f /tmp/s.sock /tmp/serial.log
+echo "[boot-test] Launching NeuroSched kernel in QEMU..."
 
-# Start QEMU: kernel via Multiboot1, serial to Unix socket (waits for client)
-qemu-system-i386 \
+timeout 45 qemu-system-i386 \
   -kernel /neurosched/build/kernel.elf \
-  -serial unix:/tmp/s.sock,server,wait \
+  -serial file:"$LOGFILE" \
   -display none \
   -no-reboot \
-  -m 32M 2>/tmp/q.log &
-QPID=$!
+  -m 32M \
+  -net none 2>/dev/null
 
-# Give QEMU 1s to create and bind the socket
-sleep 1
-
-echo "QEMU started (PID $QPID), connecting..."
-
-# Connect and capture up to 400 bytes within 30 seconds
-timeout 30 sh -c 'nc -U /tmp/s.sock | head -c 400' > /tmp/serial.log 2>/dev/null || true
-
-kill $QPID 2>/dev/null
-wait $QPID 2>/dev/null
-
-echo "=== serial output ==="
-cat /tmp/serial.log
-
-BYTES=$(wc -c < /tmp/serial.log 2>/dev/null || echo 0)
+echo "[boot-test] Simulation finished."
 echo ""
-echo "--- captured $BYTES bytes ---"
-
-echo "=== QEMU log ==="
-cat /tmp/q.log 2>/dev/null
+echo "==================== SERIAL LOG OUTPUT ===================="
+if [ -f "$LOGFILE" ]; then
+    cat "$LOGFILE"
+else
+    echo "ERROR: Serial log file was not generated."
+fi
+echo "==========================================================="
