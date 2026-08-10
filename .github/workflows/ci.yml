@@ -1,0 +1,46 @@
+name: NeuroSched Continuous Integration & Build Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  kernel-build:
+    name: Freestanding C Kernel Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install x86 Cross Compiler Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib build-essential nasm qemu-system-x86
+
+      - name: Compile Freestanding C Kernel
+        run: |
+          gcc -m32 -ffreestanding -O2 -Wall -Wextra -Werror -fno-stack-protector -mno-sse -mno-mmx -std=c99 -Iinclude -c kernel/kernel.c -o kernel.o
+          gcc -m32 -ffreestanding -O2 -Wall -Wextra -Werror -fno-stack-protector -mno-sse -mno-mmx -std=c99 -Iinclude -c kernel/vga.c -o vga.o
+          gcc -m32 -ffreestanding -O2 -Wall -Wextra -Werror -fno-stack-protector -mno-sse -mno-mmx -std=c99 -Iinclude -c kernel/serial.c -o serial.o
+          gcc -m32 -ffreestanding -O2 -Wall -Wextra -Werror -fno-stack-protector -mno-sse -mno-mmx -std=c99 -Iinclude -c kernel/scheduler.c -o scheduler.o
+          gcc -m32 -ffreestanding -O2 -Wall -Wextra -Werror -fno-stack-protector -mno-sse -mno-mmx -std=c99 -Iinclude -c kernel/nn_infer.c -o nn_infer.o
+
+  website-build:
+    name: Showcase Web Application Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies & Build Bundle
+        run: |
+          cd website
+          npm install
+          npm run build
