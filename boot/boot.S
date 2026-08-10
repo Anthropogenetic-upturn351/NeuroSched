@@ -95,13 +95,21 @@ _start:
     movl    %ebx, %edi          /* EDI = MBI pointer                         */
 
     /*
-     * RAW BOOT PROBE: write 'S' directly to COM1 data register immediately.
-     * No THRE polling — direct outb is safe since QEMU accepts the byte
-     * unconditionally. This fires before stack/FPU/C so we can verify
-     * the kernel loaded and jumped here correctly.
+     * RAW BOOT PROBE: write to both COM1 (0x3F8) and QEMU debug port (0xE9).
+     * Port 0xE9 always prints to QEMU stderr with no -serial config needed.
+     * If 'S' appears on stderr, _start is executing.
+     * If 'S' appears on serial file, COM1 is wired correctly.
      */
+    movw    $0xE9, %dx
+    movb    $0x53, %al          /* 'S' — start probe                         */
+    outb    %al, %dx
+
     movw    $0x3F8, %dx         /* COM1 Data Register                        */
-    movb    $0x53, %al          /* 'S' = 0x53                                */
+    movb    $0x53, %al
+    outb    %al, %dx
+
+    movw    $0xE9, %dx
+    movb    $0x0A, %al          /* newline on debug port                     */
     outb    %al, %dx
 
     /* Restore Multiboot registers for kernel_main */
