@@ -23,8 +23,10 @@
 #include "process.h"
 #include <stdint.h>
 
-/* Multiboot2 bootloader magic value */
+/* Multiboot2 bootloader magic value (passed by GRUB) */
 #define MULTIBOOT2_BOOTLOADER_MAGIC     0x36D76289U
+/* Multiboot1 bootloader magic value (passed by QEMU -kernel) */
+#define MULTIBOOT1_BOOTLOADER_MAGIC     0x2BADB002U
 
 /*
  * kernel_main — C kernel entry point.
@@ -42,6 +44,9 @@ void kernel_main(uint32_t magic, void *mbi_addr) {
     terminal_init();    /* Clear VGA screen, reset cursor                    */
     serial_init();      /* Configure COM1 at 38400 baud for telemetry output */
 
+    /* Immediately confirm boot via serial — visible even before simulation  */
+    serial_write("# NeuroSched v1.0 booting...\n");
+
     /* ── Step 2: Boot banner ──────────────────────────────────────────────── */
     terminal_hline(VGA_ATTR_HEADER);
     terminal_write_colored("  NeuroSched v1.0 — Neural-Network-Driven OS Scheduler\n",
@@ -50,9 +55,11 @@ void kernel_main(uint32_t magic, void *mbi_addr) {
                            VGA_ATTR_HEADER);
     terminal_hline(VGA_ATTR_HEADER);
 
-    /* ── Step 3: Verify Multiboot2 magic ─────────────────────────────────── */
-    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        terminal_write_colored("[FATAL] Invalid Multiboot2 magic: 0x", VGA_ATTR_ERROR);
+    /* ── Step 3: Verify boot magic ────────────────────────────────────────── */
+    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC &&
+        magic != MULTIBOOT1_BOOTLOADER_MAGIC) {
+        serial_write("# FATAL: invalid boot magic\n");
+        terminal_write_colored("[FATAL] Invalid Multiboot magic: 0x", VGA_ATTR_ERROR);
         /* Print hex representation of magic */
         uint32_t m = magic;
         char hex[9];
@@ -63,9 +70,8 @@ void kernel_main(uint32_t magic, void *mbi_addr) {
             m >>= 4;
         }
         terminal_write(hex);
-        terminal_write_colored("\n[FATAL] Was this loaded by a Multiboot2 bootloader?\n",
+        terminal_write_colored("\n[FATAL] Was this loaded by a Multiboot bootloader?\n",
                                VGA_ATTR_ERROR);
-        /* Halt — cannot continue without valid boot environment */
         while (1) { __asm__ volatile ("hlt"); }
     }
 
