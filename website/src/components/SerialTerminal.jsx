@@ -8,10 +8,12 @@ export default function SerialTerminal() {
     'Type "help" for available kernel commands.',
     ''
   ]);
-  const bottomRef = useRef(null);
+  const terminalBoxRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (terminalBoxRef.current) {
+      terminalBoxRef.current.scrollTop = terminalBoxRef.current.scrollHeight;
+    }
   }, [logs]);
 
   const handleCommand = (e) => {
@@ -112,7 +114,7 @@ export default function SerialTerminal() {
       </div>
 
       {/* Terminal Screen */}
-      <div className="bg-[#0B0B0D] border border-[#333333] p-4 font-mono text-xs h-64 overflow-y-auto space-y-1 text-[#EAEAEA]">
+      <div ref={terminalBoxRef} className="bg-[#0B0B0D] border border-[#333333] p-4 font-mono text-xs h-64 overflow-y-auto space-y-1 text-[#EAEAEA]">
         {logs.map((line, idx) => (
           <div 
             key={idx} 
@@ -129,7 +131,6 @@ export default function SerialTerminal() {
             {line}
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
 
       {/* Interactive Command Input Form */}

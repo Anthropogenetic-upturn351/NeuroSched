@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AudienceToggle from './components/AudienceToggle';
@@ -15,6 +15,10 @@ import Footer from './components/Footer';
 
 export default function App() {
   const [currentMode, setCurrentMode] = useState('architect');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const toggleMode = () => {
     setCurrentMode((prev) => (prev === 'architect' ? 'beginner' : 'architect'));
