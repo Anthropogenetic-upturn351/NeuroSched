@@ -1,199 +1,136 @@
 # NeuroSched
 
-<p align="center">
-  <a href="https://neurosched.vercel.app">
-    <img src="https://img.shields.io/badge/Live-Showcase%20App-FF5A00?style=for-the-badge&logo=vercel" alt="Live Showcase App" />
-  </a>
-  <a href="CERTIFICATE.md">
-    <img src="https://img.shields.io/badge/Official-Project%20Certificate-10B981?style=for-the-badge&logo=shield" alt="Project Certificate" />
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-FFD600?style=for-the-badge" alt="MIT License" />
-  </a>
-  <a href="boot/boot.S">
-    <img src="https://img.shields.io/badge/Target-x86%20Bare--Metal-EAEAEA?style=for-the-badge&logo=cpu" alt="x86 Target" />
-  </a>
-  <a href="scripts/boot-test.sh">
-    <img src="https://img.shields.io/badge/Build-PASSED-10B981?style=for-the-badge" alt="Build Status" />
-  </a>
-</p>
-
-<p align="center">
-  <b>A minimal x86 bare-metal operating system kernel where a trained C neural network inference engine replaces traditional Round-Robin process scheduling.</b>
-</p>
+A minimal x86 bare-metal operating system kernel featuring an embedded C neural network process scheduler.
 
 ---
 
-## Executive Summary
+## Overview
 
-**NeuroSched** is an experimental x86 operating system kernel built to demonstrate that embedded machine learning models can replace traditional, static OS process scheduling algorithms (such as Round-Robin) on bare-metal hardware.
-
-Boots via GRUB and Multiboot2 on real x86 hardware or QEMU emulators, NeuroSched runs multi-process workloads through a 2-phase execution pipeline. During Phase 1, it logs Round-Robin execution telemetry over the COM1 serial UART. In Phase 2, an embedded 5→8→1 Multi-Layer Perceptron (MLP) evaluates ready processes in real time to select the optimal process for execution, achieving a **16.8% reduction in average wait time**.
+NeuroSched is a freestanding 32-bit x86 operating system kernel designed to evaluate artificial intelligence models for process scheduling at the hardware level. The kernel boots via Multiboot2, executes multi-process workloads under Round-Robin and neural scheduling algorithms, and logs empirical metrics over COM1 serial and VGA text memory.
 
 ---
 
-## System Architecture & Technical Specifications
+## System Architecture
 
-```text
-================================================================================
-                    NEUROSCHED SYSTEM SPECIFICATIONS MATRIX                     
-================================================================================
-  KERNEL SPECIFICATION:   v1.0 Bare-Metal x86 Kernel
-  AUTHOR & MAINTAINER:    MANTIS (https://github.com/mantisdarling)
-  LICENSE:                MIT License (See LICENSE file)
-  TARGET ARCHITECTURE:    x86 i686 Protected 32-Bit Mode
-  BOOT STANDARDS:         Multiboot1 (0x1BADB002) & Multiboot2 (0xE85250D6)
-  NEURAL ENGINE:          5 Inputs -> 8 Hidden (ReLU) -> 1 Output (Sigmoid)
-  HEAP ALLOCATION:        0 Bytes (Zero malloc calls; static stack buffers)
-  HARDWARE FPU:           x87 FPU Enabled via CR0 Assembly Flags
-  BENCHMARK OUTCOME:      -16.8% Average Process Wait Time Reduction
-================================================================================
-```
+NeuroSched executes in 32-bit protected mode without external C runtime libraries (`libc`) or dynamic memory management (`malloc`).
 
-### 1. Key Engineering Innovations
-
-- **Confidence Fallback Engine**: A major structural safety innovation. When the neural model's prediction confidence falls below `NN_CONF_THRESH` (default: `0.65f`), the kernel logs a warning and safely defers to Round-Robin execution for that tick, guaranteeing **100% kernel stability**.
-- **Freestanding C Inference**: The neural network inference engine (`kernel/nn_infer.c`) contains **zero dependencies on standard C runtime libraries** (`math.h`, `stdlib.h`, `stdio.h`). All activation functions are computed using numerical approximations.
-- **x87 Hardware FPU Enablement**: Assembly boot code (`boot/boot.S`) configures the Control Register 0 (`CR0.EM=0`, `CR0.MP=1`) to activate native hardware floating-point operations while preserving Multiboot handoff registers.
-- **Dual Telemetry Drivers**: Logs CSV diagnostic streams to COM1 serial UART (`0x3F8`) while rendering real-time 16-color status metrics to VGA text memory (`0xB8000`).
+- **Bootloader Handoff**: `boot/boot.S` receives control from Multiboot2 bootloaders, configures a 16 KiB System V ABI stack, enables hardware x87 FPU state via CR0 flags, and calls `kernelMain`.
+- **Hardware Drivers**: Custom I/O port drivers initialize the COM1 serial UART (38,400 baud, 8N1) at port `0x3F8` and the 80x25 VGA text buffer at physical address `0xB8000`.
+- **Process Management**: A fixed-size Process Control Block (PCB) table manages process states (`READY`, `RUNNING`, `TERMINATED`).
+- **Telemetry Streaming**: Real-time process telemetry CSV logs are streamed directly over serial port I/O.
 
 ---
 
-## Neural Input Feature Vector Matrix
+## Neural Inference Engine
 
-For every ready candidate process, the C inference engine evaluates 5 normalized input features:
+The scheduling model is a 2-layer Multi-Layer Perceptron (MLP) implemented in pure freestanding C (`kernel/nn_infer.c`).
 
-| Index | Feature Parameter | System Rationale |
-| :---: | :--- | :--- |
-| `0` | `waitTicks` | Prevents process starvation by increasing scheduling score for long-waiting jobs |
-| `1` | `remainingBurst` | Implements Shortest-Job-First (SJF) optimization signals to accelerate overall job completion |
-| `2` | `priority` | Honors static real-time or system process priority classes |
-| `3` | `ioBound` | Prioritizes I/O-bound jobs to maximize CPU/peripheral overlap |
-| `4` | `ioYieldCount` | Evaluates historical voluntary yield frequency |
+### Feature Vector Parameters
 
----
+For each scheduling cycle, candidate processes are scored using 5 normalized inputs:
 
-## Interactive Showcase Web Application
+| Parameter | Feature Name | Description |
+| :--- | :--- | :--- |
+| Feature 0 | `waitTicks` | Process waiting duration (starvation prevention) |
+| Feature 1 | `remainingBurst` | Remaining execution burst time (Shortest-Job-First signal) |
+| Feature 2 | `priority` | Static scheduling class priority (1 to 5) |
+| Feature 3 | `ioBound` | Binary flag indicating I/O device dependency |
+| Feature 4 | `ioYieldCount` | Historical voluntary yield frequency |
 
-NeuroSched includes a **Linear.app-engineered interactive showcase web application** deployed on Vercel:
+### Mathematical Approximations
 
-- 🔗 **Live Web Showcase**: **[https://neurosched.vercel.app](https://neurosched.vercel.app)**
-- **Features**:
-  - **Living Terminal Console**: Interactive Multiboot2 boot trace simulator.
-  - **Audience Mode Switcher**: Toggle between **Beginner (ELIF5)** and **System Architect** modes.
-  - **60fps HTML5 Canvas Neural Map**: Animated signal propagation through the 5→8→1 MLP.
-  - **Interactive Confidence Slider (`0.50`–`0.90`)**: Drag the confidence slider live to trigger real-time fallback alerts.
+To eliminate standard C math library dependencies:
+- **Sigmoid Activation**: Computed via a 6-term Taylor-series polynomial expansion.
+- **ReLU Activation**: Evaluated using zero-bound scalar comparison `max(0, x)`.
+- **Memory Footprint**: Weight matrices (`W1`, `W2`) are compiled statically into `.rodata` (57 total float parameters).
 
 ---
 
-## System Architecture Pipeline
+## Confidence Fallback Architecture
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     NeuroSched Bare-Metal Execution Pipeline                │
-│                                                                             │
-│  GRUB / Multiboot2 Bootloader                                               │
-│       │                                                                     │
-│       ▼                                                                     │
-│  boot/boot.S (_start)                                                       │
-│    • Verifies Multiboot magic in EAX                                        │
-│    • Allocates 16 KiB System V ABI stack in .bss                            │
-│    • Enables x87 FPU (CR0 flags via ECX register)                           │
-│    • Calls kernelMain(magic, mbiAddr)                                       │
-│       │                                                                     │
-│       ▼                                                                     │
-│  kernel/kernel.c (kernelMain)                                               │
-│    • Configures COM1 serial UART (38400 baud, 8N1 @ 0x3F8)                 │
-│    • Initializes VGA text-mode buffer (80x25 @ 0xB8000)                     │
-│       │                                                                     │
-│       ├──► Phase 1: Round-Robin Simulation                                  │
-│       │      • scheduler.c: runRoundRobin()                                 │
-│       │      • Logs CSV telemetry to COM1 serial                            │
-│       │                                                                     │
-│       ├──► Phase 2: Neural Scheduler Simulation                             │
-│       │      • nn_infer.c: nnSelectProcess()                                │
-│       │      • Evaluates 5 inputs → 8 hidden → 1 output                     │
-│       │      • If confidence < 0.65f: Fallback to Round-Robin               │
-│       │                                                                     │
-│       └──► Phase 3: Side-by-Side Comparison HUD                             │
-│              • Prints wait time, turnaround, throughput comparison to VGA   │
-│              • Halts CPU via HLT instruction                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+To prevent kernel failure on out-of-distribution inputs, NeuroSched implements a confidence fallback mechanism:
+1. The neural engine scores each process and computes the confidence value (sigmoid output).
+2. If prediction confidence drops below `NN_CONF_THRESH` (0.65f), the kernel logs a warning.
+3. The scheduler safely reverts to Round-Robin execution for that tick.
 
 ---
 
-## Empirical QEMU Benchmark Outcomes
+## Performance Benchmarks
 
-Verified execution outcomes captured over COM1 serial UART during headless QEMU test runs:
+Empirical performance comparison captured during headless QEMU serial telemetry runs:
 
-| Scheduling Metric | Round-Robin Baseline | Neural + Fallback | Improvement |
+| Scheduling Metric | Round-Robin Baseline | Neural Scheduler + Fallback | Delta Improvement |
 | :--- | :--- | :--- | :--- |
-| **Average Wait Time** | **34.40 ticks** | **28.60 ticks** | **+16.8% Faster Response** |
-| **Average Turnaround** | **40.80 ticks** | **35.00 ticks** | **+14.2% Faster Completion** |
-| **Total Workload Ticks** | 64 ticks | 64 ticks | 100% Workload Finished |
-| **Safety Fallback Coverage** | N/A | 50 times | 100% Kernel Stability |
+| Average Wait Time | 34.40 ticks | 28.60 ticks | -16.8% |
+| Average Turnaround Time | 40.80 ticks | 35.00 ticks | -14.2% |
+| Workload Completion | 64 ticks | 64 ticks | 100% Complete |
+| Safety Fallbacks | N/A | 50 triggers | 100% Stable |
 
 ---
 
-## Quickstart & Local Build Instructions
+## Interactive Web Showcase
 
-### Option 1: Run via Docker (Recommended)
-```bash
-docker run --rm -v "%CD%:/neurosched" neurosched-qemu bash /neurosched/scripts/boot-test.sh
-```
-
-### Option 2: Build Native i686-elf Cross-Compiler
-```powershell
-# Add cross-compiler to PATH
-$env:PATH = "$(pwd)\tools\i686-elf\bin;$env:PATH"
-
-# Build kernel ELF and bootable ISO
-make clean
-make
-
-# Run in QEMU
-make run
-```
-
-### Option 3: Train Neural Weights in Python
-```bash
-python scripts/train.py --epochs 500
-make
-```
+A web-based interactive simulation and visualization application is available at:
+[https://neurosched.vercel.app](https://neurosched.vercel.app)
 
 ---
 
-## Clean Repository Directory Map
+## Building and Running
 
-```text
+### Prerequisites
+
+- Cross-Compiler: `i686-elf-gcc`, `i686-elf-as`, `i686-elf-ld`
+- Emulator: `qemu-system-i386`
+- Container Environment: Docker (optional)
+
+### Command Reference
+
+- Run via Docker QEMU runner:
+  ```bash
+  docker run --rm -v "%CD%:/neurosched" neurosched-qemu bash /neurosched/scripts/boot-test.sh
+  ```
+
+- Build kernel ELF and ISO locally:
+  ```bash
+  make clean && make
+  ```
+
+- Train model weights:
+  ```bash
+  python scripts/train.py --epochs 500
+  ```
+
+---
+
+## Directory Structure
+
+```
 NeuroSched/
 ├── boot/
-│   └── boot.S             # Multiboot2 assembly entry point & x87 FPU setup
+│   └── boot.S             # Assembly bootloader stub and FPU initialization
 ├── kernel/
-│   ├── kernel.c           # C kernel entry & orchestration
-│   ├── vga.c / vga.h      # 80x25 VGA text mode driver (0xB8000)
+│   ├── kernel.c           # Kernel entry point and orchestration
+│   ├── vga.c / vga.h      # VGA text mode driver (0xB8000)
 │   ├── serial.c / serial.h# COM1 serial UART driver (0x3F8)
-│   ├── process.h          # Process Control Block definition
-│   ├── scheduler.c / .h   # Round-Robin & Neural scheduler implementation
-│   └── nn_infer.c / .h    # Freestanding C MLP inference engine
+│   ├── process.h          # Process Control Block schema
+│   ├── scheduler.c / .h   # Round-Robin and Neural scheduling algorithms
+│   └── nn_infer.c / .h    # Freestanding C neural inference engine
 ├── include/
-│   └── nn_weights.h       # Auto-generated trained weight matrices
+│   └── nn_weights.h       # Trained model weight matrices
 ├── scripts/
-│   ├── train.py           # PyTorch-free SGD Momentum model trainer
-│   └── boot-test.sh       # Automated QEMU serial verification test runner
-├── website/               # Linear.app-engineered showcase web application
-├── CERTIFICATE.md         # Official project certification document
-├── LICENSE                # MIT License
-├── linker.ld              # Bare-metal ELF linker script (physical load @ 1MB)
-├── Makefile               # Full build pipeline configuration
-└── README.md              # Project documentation
+│   ├── train.py           # Model training script
+│   └── boot-test.sh       # QEMU execution test script
+├── website/               # Showcase web application
+├── CERTIFICATE.md         # Official project certificate
+├── LICENSE                # MIT License terms
+├── linker.ld              # Linker script for 1 MB physical load address
+└── Makefile               # Kernel build automation
 ```
 
 ---
 
-## License & Author Info
+## License and Author Information
 
-- **Author & Maintainer**: **MANTIS** ([mantisdarling](https://github.com/mantisdarling))
-- **Project Certificate**: Documented in [`CERTIFICATE.md`](CERTIFICATE.md)
-- **License**: Released under the terms of the **MIT License**. See [`LICENSE`](LICENSE) for complete details.
+- Author: **MANTIS** ([mantisdarling](https://github.com/mantisdarling))
+- Certificate: [CERTIFICATE.md](CERTIFICATE.md)
+- License: [MIT License](LICENSE)
