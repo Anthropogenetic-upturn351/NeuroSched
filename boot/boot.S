@@ -33,8 +33,15 @@
 .equ MB2_ARCH,      0
 .equ MB2_HDR_LEN,   24          /* 4+4+4+4 bytes + 8-byte end tag */
 /* Checksum: (magic + arch + len + checksum) must equal 0 mod 2^32      */
-/* = -(0xE85250D6 + 0 + 24) mod 2^32 = 0x17ADAF02 + ... computed below  */
 .equ MB2_CHECKSUM,  (0 - MB2_MAGIC - MB2_ARCH - MB2_HDR_LEN)
+
+/* ─── Multiboot1 constants (for QEMU -kernel direct loading) ────────────────
+ * QEMU's built-in -kernel loader uses Multiboot1 for ELF kernels, so
+ * we embed both headers. GRUB uses the Multiboot2 header; QEMU uses this one.
+ */
+.equ MB1_MAGIC,     0x1BADB002
+.equ MB1_FLAGS,     0x00000000
+.equ MB1_CHECKSUM,  (0 - MB1_MAGIC - MB1_FLAGS)
 
 /* ─── Stack size ─────────────────────────────────────────────────────────── */
 .equ STACK_SIZE,    16384       /* 16 KiB; plenty for our simple kernel      */
@@ -57,6 +64,17 @@ multiboot2_header:
     .word   0                       /* Tag type: end                         */
     .word   0                       /* Tag flags: required                   */
     .long   8                       /* Tag size: 8 bytes                     */
+
+/* ─── Multiboot1 header (for QEMU -kernel direct loading) ───────────────────
+ * Placed in the same section, 4-byte aligned as required by Multiboot1 spec.
+ * Must appear within first 8 KiB of the loaded kernel image.
+ */
+    .section .multiboot2, "a"
+    .align 4
+multiboot1_header:
+    .long   MB1_MAGIC               /* Multiboot1 magic                      */
+    .long   MB1_FLAGS               /* Flags: no special features             */
+    .long   MB1_CHECKSUM            /* Checksum: -(magic+flags) mod 2^32      */
 
 /* ─── BSS: kernel stack ──────────────────────────────────────────────────── */
     .section .bss, "aw", @nobits
