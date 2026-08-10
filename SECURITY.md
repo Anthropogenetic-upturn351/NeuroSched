@@ -1,34 +1,51 @@
-# Security Policy
+# Security Policy & Vulnerability Disclosure
+
+This document outlines the security architecture, threat model, and vulnerability reporting procedures for the **NeuroSched** bare-metal operating system kernel and web showcase application.
+
+---
 
 ## Supported Versions
 
-The following table details which versions of **NeuroSched** receive security updates and maintenance:
+Security maintenance and vulnerability patches are actively provided for the following release targets:
 
-| Version | Supported | Security Maintenance |
+| Target Component | Version | Security Support Status |
 | :--- | :--- | :--- |
-| v1.0 (main branch) | :white_check_mark: Yes | Active Maintenance |
-| < v1.0 | :x: No | End of Life |
+| **NeuroSched Core Kernel** | v1.0 (main branch) | :white_check_mark: Active Maintenance |
+| **Showcase Web Application** | v1.0 (`website/`) | :white_check_mark: Active Maintenance |
+| Legacy Build Variants | < v1.0 | :x: Unsupported |
+
+---
+
+## Threat Model & Security Architecture
+
+NeuroSched operates in x86 32-bit protected mode (Ring 0). The kernel enforces the following architectural security controls:
+
+### 1. Static Memory Bounds (Zero-Heap Architecture)
+The kernel eliminates dynamic heap memory allocation (`malloc`/`free`) entirely. All Process Control Blocks (PCB) and neural weight matrices (`W1`, `W2`) are allocated statically within fixed memory boundaries in `.rodata` and stack memory, eliminating heap overflow attack vectors.
+
+### 2. Confidence Fallback Protection
+To mitigate adversarial input manipulation or out-of-distribution neural prediction failures, the scheduler evaluates model output confidence against `NN_CONF_THRESH` (0.65f). Predictions below this threshold trigger an immediate fallback to deterministic Round-Robin execution, preventing kernel instability.
+
+### 3. Freestanding Runtime Isolation
+By executing without standard runtime library dependencies (`libc`), the kernel avoids external C library attack vectors.
 
 ---
 
 ## Reporting a Vulnerability
 
-We take the security and integrity of our bare-metal kernel code and web application seriously.
+We request responsible disclosure for any security vulnerabilities or architectural flaws.
 
-### How to Report
-If you discover a security vulnerability, memory safety issue, or speculative execution vulnerability within NeuroSched:
+### Disclosure Process
 
-1. **Do NOT open a public GitHub issue.**
-2. Send a private vulnerability report detailing the issue to the maintainer via GitHub ([mantisdarling](https://github.com/mantisdarling)).
-3. Include:
-   - Type of vulnerability (e.g., buffer overflow, register corruption, web XSS)
-   - Step-by-step reproduction instructions or proof-of-concept code
-   - Potential impact on kernel execution stability or web application security
+1. **Private Notification**: Do not disclose security vulnerabilities publicly via GitHub Issues.
+2. **Contact Channel**: Send a private vulnerability advisory directly to the project maintainer via GitHub ([mantisdarling](https://github.com/mantisdarling)).
+3. **Advisory Content**:
+   - Technical description of the vulnerability or memory flaw.
+   - Proof-of-concept execution logs, register dumps, or reproduction steps.
+   - Potential impact assessment.
 
----
+### Response Timeline
 
-## Security Practices & Architecture
-
-- **Zero-Malloc Memory Safety**: The kernel allocates all process control tables and neural weight matrices statically on the stack or in `.rodata` to prevent heap exploitation.
-- **Confidence Fallback Safeguard**: If neural network inference yields out-of-distribution confidence scores (< 0.65f), the kernel safely reverts to Round-Robin execution for 100% stability.
-- **Freestanding Isolation**: Zero dependencies on external C runtime libraries (`libc`) eliminate external standard library attack surfaces.
+- **Acknowledgement**: Within 48 hours of initial report.
+- **Triage & Impact Assessment**: Within 5 business days.
+- **Patch Release & Security Advisory**: Target patch release within 30 days of vulnerability validation.
