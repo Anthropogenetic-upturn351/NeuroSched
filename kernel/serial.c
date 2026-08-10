@@ -72,9 +72,11 @@ void serial_putchar(char c) {
     /*
      * Poll the Line Status Register until the Transmit Holding Register is
      * empty (bit 5 = 1), then write our byte to the Data Register.
-     * This is a busy-wait loop — acceptable for a simple kernel with no ISRs.
+     * We cap retries at 100000 to avoid hanging if the UART is unresponsive
+     * (e.g. QEMU serial backend with no connected client).
      */
-    while ((inb(SERIAL_COM1_BASE + 5) & LSR_TX_EMPTY) == 0) {
+    uint32_t retries = 100000;
+    while (retries-- && (inb(SERIAL_COM1_BASE + 5) & LSR_TX_EMPTY) == 0) {
         /* Wait for transmit buffer to drain */
     }
     outb(SERIAL_COM1_BASE, (uint8_t)c);

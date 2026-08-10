@@ -40,12 +40,11 @@ void kernel_main(uint32_t magic, void *mbi_addr) {
     /* Silence unused-variable warning (mbi_addr not parsed in this version) */
     (void)mbi_addr;
 
-    /* ── Step 1: Initialize hardware drivers ──────────────────────────────── */
-    terminal_init();    /* Clear VGA screen, reset cursor                    */
-    serial_init();      /* Configure COM1 at 38400 baud for telemetry output */
-
-    /* Immediately confirm boot via serial — visible even before simulation  */
+    /* Init serial first so boot is visible even if VGA hangs */
+    serial_init();
     serial_write("# NeuroSched v1.0 booting...\n");
+
+    terminal_init();    /* Clear VGA screen, reset cursor */
 
     /* ── Step 2: Boot banner ──────────────────────────────────────────────── */
     terminal_hline(VGA_ATTR_HEADER);
