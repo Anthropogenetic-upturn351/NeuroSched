@@ -95,20 +95,13 @@ _start:
     movl    %ebx, %edi          /* EDI = MBI pointer                         */
 
     /*
-     * RAW BOOT PROBE: write byte 'S' (0x53) directly to COM1 data register
-     * BEFORE stack/FPU setup. This verifies COM1 outb works at the earliest
-     * possible moment — no C, no driver, no init.
+     * RAW BOOT PROBE: write 'S' directly to COM1 data register immediately.
+     * No THRE polling — direct outb is safe since QEMU accepts the byte
+     * unconditionally. This fires before stack/FPU/C so we can verify
+     * the kernel loaded and jumped here correctly.
      */
-    movw    $0x3FD, %dx         /* COM1 Line Status Register                 */
-    movl    $100000, %ecx       /* retry count                               */
-.Lprobe_wait:
-    inb     %dx, %al
-    testb   $0x20, %al          /* Test THRE (bit 5)                         */
-    jnz     .Lprobe_write
-    loop    .Lprobe_wait
-.Lprobe_write:
     movw    $0x3F8, %dx         /* COM1 Data Register                        */
-    movb    $0x53, %al          /* 'S' = 0x53, probe byte                    */
+    movb    $0x53, %al          /* 'S' = 0x53                                */
     outb    %al, %dx
 
     /* Restore Multiboot registers for kernel_main */

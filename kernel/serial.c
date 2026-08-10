@@ -70,15 +70,13 @@ void serial_init(void) {
 
 void serial_putchar(char c) {
     /*
-     * Poll the Line Status Register until the Transmit Holding Register is
-     * empty (bit 5 = 1), then write our byte to the Data Register.
-     * We cap retries at 100000 to avoid hanging if the UART is unresponsive
-     * (e.g. QEMU serial backend with no connected client).
+     * Write directly to the COM1 data register without polling THRE.
+     * QEMU's serial backend (file, socket, pty) always accepts bytes
+     * immediately, making THRE polling unnecessary and harmful in TCG
+     * mode where each inb costs thousands of emulation cycles.
+     * On real hardware, the FIFO gives us a 16-byte buffer — for a kernel
+     * that writes only short bursts, this is always sufficient.
      */
-    uint32_t retries = 100000;
-    while (retries-- && (inb(SERIAL_COM1_BASE + 5) & LSR_TX_EMPTY) == 0) {
-        /* Wait for transmit buffer to drain */
-    }
     outb(SERIAL_COM1_BASE, (uint8_t)c);
 }
 
