@@ -4,21 +4,15 @@ LOGFILE="/tmp/serial.log"
 rm -f "$LOGFILE"
 
 echo "[boot-test] Launching NeuroSched kernel in QEMU..."
+echo "==================== SERIAL LOG OUTPUT ===================="
 
-timeout 25 qemu-system-i386 \
+timeout 20 qemu-system-i386 \
   -kernel /neurosched/build/kernel.elf \
-  -serial file:"$LOGFILE" \
+  -serial stdio \
   -display none \
   -no-reboot \
   -m 32M \
-  -net none 2>/dev/null
+  -net none 2>&1
 
-echo "[boot-test] Simulation finished."
-echo ""
-echo "==================== SERIAL LOG OUTPUT ===================="
-if [ -f "$LOGFILE" ]; then
-    cat "$LOGFILE"
-else
-    echo "ERROR: Serial log file was not generated."
-fi
 echo "==========================================================="
+echo "[boot-test] Simulation finished."
