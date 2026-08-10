@@ -16,7 +16,7 @@ export default function SerialTerminal() {
 
   const handleCommand = (e) => {
     e.preventDefault();
-    const cmd = inputVal.trim().toLowerCase();
+    const cmd = inputVal.replace(/[^\w\s]/gi, '').trim().toLowerCase();
     if (!cmd) return;
 
     let response = [];
