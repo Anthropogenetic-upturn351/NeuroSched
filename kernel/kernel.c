@@ -114,6 +114,7 @@ void kernel_main(uint32_t magic, void *mbi_addr) {
                            VGA_ATTR_NEURAL);
     terminal_write_colored("    (Yellow lines = NN fell back to round-robin)\n\n",
                            VGA_ATTR_INFO);
+    serial_write("# Phase 2: Neural Network Scheduler Simulation starting...\n");
 
     sched_metrics_t nn_metrics = {0};
     run_neural_scheduler(workload_nn, n_procs, &nn_metrics);
@@ -121,9 +122,13 @@ void kernel_main(uint32_t magic, void *mbi_addr) {
     terminal_write_colored("\n[OK] Neural scheduler complete. Ticks: ", VGA_ATTR_SUCCESS);
     terminal_write_int((int32_t)nn_metrics.total_ticks);
     terminal_write_colored("\n", VGA_ATTR_SUCCESS);
+    serial_write("# Neural scheduler complete. Ticks: ");
+    serial_write_int((int32_t)nn_metrics.total_ticks);
+    serial_newline();
 
     /* ── Step 7: Phase 5 — Print Comparison Table ────────────────────────── */
     print_comparison(&rr_metrics, &nn_metrics);
+
 
     terminal_write("\n");
     terminal_write_colored("  NeuroSched simulation complete. Halting CPU.\n",

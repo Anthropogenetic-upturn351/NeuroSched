@@ -326,9 +326,17 @@ void print_comparison(const sched_metrics_t *rr_m, const sched_metrics_t *nn_m) 
                            VGA_ATTR_HEADER);
     terminal_hline(VGA_ATTR_HEADER);
 
+    serial_newline();
+    serial_write("===========================================================\n");
+    serial_write("  NEUROSCHED: Scheduling Algorithm Comparison\n");
+    serial_write("===========================================================\n");
+
     terminal_write_colored("  Metric               Round-Robin    Neural+Fallback\n",
                            VGA_ATTR_INFO);
     terminal_hline(VGA_ATTR_NORMAL);
+
+    serial_write("  Metric               Round-Robin    Neural+Fallback\n");
+    serial_write("-----------------------------------------------------------\n");
 
     /* Average Wait Time */
     terminal_write("  Avg Wait Time:      ");
@@ -337,6 +345,16 @@ void print_comparison(const sched_metrics_t *rr_m, const sched_metrics_t *nn_m) 
     terminal_write_fixed((int32_t)nn_m->avg_wait_hundredths);
     terminal_write_colored(" ticks\n", VGA_ATTR_NORMAL);
 
+    serial_write("  Avg Wait Time:      ");
+    serial_write_int((int32_t)rr_m->avg_wait_hundredths / 100);
+    serial_write(".");
+    serial_write_int((int32_t)rr_m->avg_wait_hundredths % 100);
+    serial_write(" ticks      ");
+    serial_write_int((int32_t)nn_m->avg_wait_hundredths / 100);
+    serial_write(".");
+    serial_write_int((int32_t)nn_m->avg_wait_hundredths % 100);
+    serial_write(" ticks\n");
+
     /* Average Turnaround Time */
     terminal_write("  Avg Turnaround:     ");
     terminal_write_fixed((int32_t)rr_m->avg_turnaround_hundredths);
@@ -344,12 +362,28 @@ void print_comparison(const sched_metrics_t *rr_m, const sched_metrics_t *nn_m) 
     terminal_write_fixed((int32_t)nn_m->avg_turnaround_hundredths);
     terminal_write_colored(" ticks\n", VGA_ATTR_NORMAL);
 
+    serial_write("  Avg Turnaround:     ");
+    serial_write_int((int32_t)rr_m->avg_turnaround_hundredths / 100);
+    serial_write(".");
+    serial_write_int((int32_t)rr_m->avg_turnaround_hundredths % 100);
+    serial_write(" ticks      ");
+    serial_write_int((int32_t)nn_m->avg_turnaround_hundredths / 100);
+    serial_write(".");
+    serial_write_int((int32_t)nn_m->avg_turnaround_hundredths % 100);
+    serial_write(" ticks\n");
+
     /* Total Simulation Ticks */
     terminal_write("  Total Ticks:        ");
     terminal_write_int((int32_t)rr_m->total_ticks);
     terminal_write("             ");
     terminal_write_int((int32_t)nn_m->total_ticks);
     terminal_write_colored("\n", VGA_ATTR_NORMAL);
+
+    serial_write("  Total Ticks:        ");
+    serial_write_int((int32_t)rr_m->total_ticks);
+    serial_write("             ");
+    serial_write_int((int32_t)nn_m->total_ticks);
+    serial_newline();
 
     /* Throughput (processes per 100 ticks) */
     terminal_write("  Throughput(/100t):  ");
@@ -363,21 +397,31 @@ void print_comparison(const sched_metrics_t *rr_m, const sched_metrics_t *nn_m) 
     terminal_write_int((int32_t)nn_m->nn_fallback_count);
     terminal_write_colored(" times\n", VGA_ATTR_WARN);
 
+    serial_write("  NN Fallbacks:       --             ");
+    serial_write_int((int32_t)nn_m->nn_fallback_count);
+    serial_write(" times\n");
+
     terminal_hline(VGA_ATTR_HEADER);
+    serial_write("===========================================================\n");
 
     /* Summary judgment */
     if (nn_m->avg_wait_hundredths < rr_m->avg_wait_hundredths) {
         terminal_write_colored("  RESULT: Neural scheduler achieved lower avg wait time!\n",
                                VGA_ATTR_SUCCESS);
+        serial_write("  RESULT: Neural scheduler achieved lower avg wait time!\n");
     } else if (nn_m->avg_wait_hundredths == rr_m->avg_wait_hundredths) {
         terminal_write_colored("  RESULT: Both schedulers performed similarly.\n",
                                VGA_ATTR_INFO);
+        serial_write("  RESULT: Both schedulers performed similarly.\n");
     } else {
         terminal_write_colored("  RESULT: Round-robin performed better on this workload.\n",
                                VGA_ATTR_WARN);
         terminal_write_colored("  (Model may need retraining on more diverse data.)\n",
                                VGA_ATTR_WARN);
+        serial_write("  RESULT: Round-robin performed better on this workload.\n");
+        serial_write("  (Model may need retraining on more diverse data.)\n");
     }
 
     terminal_hline(VGA_ATTR_HEADER);
+    serial_write("===========================================================\n");
 }
