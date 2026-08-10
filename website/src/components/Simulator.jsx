@@ -190,8 +190,8 @@ export default function Simulator() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Neural Synapse Canvas Visualizer */}
-          <div className="lg:col-span-5 carbon-card p-4 space-y-3">
-            <div className="flex items-center justify-between font-mono text-xs text-[#EAEAEA] pb-2 border-b border-[#333333]">
+          <div className="lg:col-span-5 linear-card p-4 space-y-3">
+            <div className="flex items-center justify-between font-mono text-xs text-[#EAEAEA] pb-2 border-b border-[#28282C]">
               <span>MLP Forward Pass (5 → 8 → 1)</span>
               <span className="text-[#FF5A00]">60fps Canvas</span>
             </div>
@@ -211,8 +211,8 @@ export default function Simulator() {
           </div>
 
           {/* Process Timeline Bars */}
-          <div className="lg:col-span-7 carbon-card p-6 space-y-4">
-            <div className="font-mono text-xs text-[#EAEAEA] font-bold pb-2 border-b border-[#333333] flex justify-between">
+          <div className="lg:col-span-7 linear-card p-6 space-y-4">
+            <div className="font-mono text-xs text-[#EAEAEA] font-bold pb-2 border-b border-[#28282C] flex justify-between">
               <span>Workload Execution State</span>
               <span className="text-[#888888]">10 Processes</span>
             </div>
@@ -231,7 +231,7 @@ export default function Simulator() {
                         rem: {proc.remaining}/{proc.burst}
                       </span>
                     </div>
-                    <div className="w-full h-3 bg-[#111111] border border-[#333333] overflow-hidden">
+                    <div className="w-full h-3 bg-[#0E0E10] border border-[#28282C] overflow-hidden">
                       <div
                         className={`h-full transition-all duration-300 ${
                           isActive ? 'bg-[#FF5A00]' : 'bg-[#10B981]'
