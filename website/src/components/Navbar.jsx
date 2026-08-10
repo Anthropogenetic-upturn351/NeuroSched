@@ -24,6 +24,9 @@ export default function Navbar({ currentMode, toggleMode }) {
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-6 font-mono text-xs text-[#888888]">
+          <a href="#howtouse" className="hover:text-[#FF5A00] transition-colors">
+            How to Use
+          </a>
           <a href="#simulator" className="hover:text-[#FF5A00] transition-colors flex items-center gap-1.5">
             <Activity className="w-3.5 h-3.5 text-[#FF5A00]" />
             <span>Simulator</span>

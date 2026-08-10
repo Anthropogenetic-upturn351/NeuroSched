@@ -125,6 +125,21 @@ A web-based interactive simulation and visualization application is available at
 
 ---
 
+## How to Use
+
+### 1. Web Showcase App Instructions
+1. **Interactive Simulator**: Visit [https://neurosched.vercel.app](https://neurosched.vercel.app), select your preferred audience mode (**Architect** vs **ELIF5**), and click **Start Simulation**.
+2. **Confidence Threshold Slider**: Drag the threshold slider between `0.50` and `0.90` to observe live safety fallbacks in real time.
+3. **Serial Terminal Console**: Type commands (`boot`, `run rr`, `run nn`, `stats`, `weights`) into the in-browser terminal shell to simulate COM1 UART telemetry output.
+4. **Export Report**: Click **Export Benchmark PDF Report** to download an official metric certificate.
+
+### 2. Local Kernel Command Workflow
+1. **Compile Kernel**: Run `make clean && make` to produce `build/kernel.elf` and bootable `build/neurosched.iso`.
+2. **Execute Headless Benchmark**: Run `bash scripts/boot-test.sh` inside QEMU to execute Phase 1 (Round-Robin) vs Phase 2 (Neural Scheduler) and stream COM1 telemetry logs.
+3. **Retrain Model Weights**: Run `python scripts/train.py --epochs 500` to retrain the 5→8→1 MLP using pure NumPy SGD and export updated weight matrices to `include/nn_weights.h`.
+
+---
+
 ## Directory Structure
 
 ```

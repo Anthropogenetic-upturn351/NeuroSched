@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AudienceToggle from './components/AudienceToggle';
+import HowToUse from './components/HowToUse';
 import Simulator from './components/Simulator';
 import Architecture from './components/Architecture';
 import CodeExplorer from './components/CodeExplorer';
@@ -24,6 +25,7 @@ export default function App() {
       <Navbar currentMode={currentMode} toggleMode={toggleMode} />
       <Hero currentMode={currentMode} />
       <AudienceToggle currentMode={currentMode} setMode={setCurrentMode} />
+      <HowToUse />
       <Simulator />
       
       {/* Interactive Shell & Neural Inspector Section */}
