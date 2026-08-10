@@ -90,11 +90,30 @@ stack_top:                          /* ESP will point here (stack grows down) */
     .type   _start, @function
 
 _start:
+    /* Preserve Multiboot handoff registers before probe clobbers them */
+    movl    %eax, %esi          /* ESI = Multiboot magic                     */
+    movl    %ebx, %edi          /* EDI = MBI pointer                         */
+
     /*
-     * At this point the CPU is in 32-bit protected mode with interrupts
-     * disabled. EAX holds the Multiboot2 magic; EBX holds the MBI address.
-     * We must NOT touch these until after we've saved them.
+     * RAW BOOT PROBE: write byte 'S' (0x53) directly to COM1 data register
+     * BEFORE stack/FPU setup. This verifies COM1 outb works at the earliest
+     * possible moment — no C, no driver, no init.
      */
+    movw    $0x3FD, %dx         /* COM1 Line Status Register                 */
+    movl    $100000, %ecx       /* retry count                               */
+.Lprobe_wait:
+    inb     %dx, %al
+    testb   $0x20, %al          /* Test THRE (bit 5)                         */
+    jnz     .Lprobe_write
+    loop    .Lprobe_wait
+.Lprobe_write:
+    movw    $0x3F8, %dx         /* COM1 Data Register                        */
+    movb    $0x53, %al          /* 'S' = 0x53, probe byte                    */
+    outb    %al, %dx
+
+    /* Restore Multiboot registers for kernel_main */
+    movl    %esi, %eax
+    movl    %edi, %ebx
 
     /* Step 1: Set up the stack.
      * Load the top of our BSS-allocated stack into ESP.
