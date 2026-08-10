@@ -146,6 +146,7 @@ NeuroSched/
 ├── website/               # Showcase web application
 ├── CERTIFICATE.md         # Official project certificate
 ├── CONTRIBUTING.md        # Contribution guidelines
+├── INFO.md                # Project information and technical overview
 ├── LICENSE                # MIT License terms
 ├── SECURITY.md            # Security policy
 ├── linker.ld              # Linker script for 1 MB physical load address
@@ -157,6 +158,7 @@ NeuroSched/
 ## License and Author Information
 
 - Author & Maintainer: **MANTIS** ([mantisdarling](https://github.com/mantisdarling))
+- Project Information: [INFO.md](INFO.md)
 - Project Certificate: [CERTIFICATE.md](CERTIFICATE.md)
 - Contributing Guidelines: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Security Policy: [SECURITY.md](SECURITY.md)
