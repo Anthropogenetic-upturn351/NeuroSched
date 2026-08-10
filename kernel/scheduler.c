@@ -50,16 +50,16 @@ int init_workload(process_t procs[]) {
      */
     process_t template[WORKLOAD_SIZE] = {
         /* pid  state         arr  total rem  run  wait start fin  pri io  ioy */
-        {  1, PROC_READY,   0,  60,  60,  0,   0,   0,   0,   4,  0,  0 },
-        {  2, PROC_READY,   0,  12,  12,  0,   0,   0,   0,   5,  1,  0 },
-        {  3, PROC_READY,   2,  80,  80,  0,   0,   0,   0,   1,  0,  0 },
-        {  4, PROC_READY,   4,  35,  35,  0,   0,   0,   0,   3,  1,  0 },
-        {  5, PROC_READY,   0,  45,  45,  0,   0,   0,   0,   5,  0,  0 },
-        {  6, PROC_READY,   8,  70,  70,  0,   0,   0,   0,   2,  0,  0 },
-        {  7, PROC_READY,   1,  10,  10,  0,   0,   0,   0,   4,  1,  0 },
-        {  8, PROC_READY,   3,  30,  30,  0,   0,   0,   0,   3,  0,  0 },
-        {  9, PROC_READY,   5,  25,  25,  0,   0,   0,   0,   2,  1,  0 },
-        { 10, PROC_READY,   0,  18,  18,  0,   0,   0,   0,   4,  1,  0 },
+        {  1, PROC_READY,   0,  10,  10,  0,   0,   0,   0,   4,  0,  0 },
+        {  2, PROC_READY,   0,   3,   3,  0,   0,   0,   0,   5,  1,  0 },
+        {  3, PROC_READY,   2,  12,  12,  0,   0,   0,   0,   1,  0,  0 },
+        {  4, PROC_READY,   4,   6,   6,  0,   0,   0,   0,   3,  1,  0 },
+        {  5, PROC_READY,   0,   8,   8,  0,   0,   0,   0,   5,  0,  0 },
+        {  6, PROC_READY,   8,  11,  11,  0,   0,   0,   0,   2,  0,  0 },
+        {  7, PROC_READY,   1,   2,   2,  0,   0,   0,   0,   4,  1,  0 },
+        {  8, PROC_READY,   3,   5,   5,  0,   0,   0,   0,   3,  0,  0 },
+        {  9, PROC_READY,   5,   4,   4,  0,   0,   0,   0,   2,  1,  0 },
+        { 10, PROC_READY,   0,   3,   3,  0,   0,   0,   0,   4,  1,  0 },
     };
 
     for (int i = 0; i < WORKLOAD_SIZE; i++) {
