@@ -1,0 +1,38 @@
+# NeuroSched .gitignore
+
+# ─── Build Artifacts ─────────────────────────────────────────────────────────
+build/
+*.o
+*.elf
+
+# ─── Kernel binary (generated, placed into iso/ by Makefile) ─────────────────
+iso/boot/kernel.bin
+
+# ─── Bootable ISO ────────────────────────────────────────────────────────────
+*.iso
+
+# ─── Training Data ───────────────────────────────────────────────────────────
+# Telemetry CSV (captured from QEMU serial, may be large)
+telemetry.csv
+
+# ─── Downloaded Toolchain ────────────────────────────────────────────────────
+# The i686-elf cross-compiler binaries (~60MB) are downloaded separately
+# See README for download instructions (lordmilko/i686-elf-tools)
+tools/
+
+# ─── Python Artifacts ────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# ─── Editor / OS Artifacts ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
