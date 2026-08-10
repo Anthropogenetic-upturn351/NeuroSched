@@ -1,6 +1,8 @@
 # NeuroSched
 
 [![Live Showcase](https://img.shields.io/badge/Live-Showcase%20App-FF5A00?style=for-the-badge&logo=vercel)](https://neurosched.vercel.app)
+[![Project Certificate](https://img.shields.io/badge/Official-Project%20Certificate-10B981?style=for-the-badge&logo=shield)](CERTIFICATE.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-FFD600?style=for-the-badge)](LICENSE)
 
 **A minimal x86 operating system where a trained neural network replaces the traditional process scheduler.**
 

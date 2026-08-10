@@ -24,7 +24,24 @@ export default function Footer() {
             <span>GitHub Repo</span>
           </a>
           <span className="text-[#333333]">|</span>
-          <span>MIT Licensed</span>
+          <a
+            href="https://github.com/mantisdarling/NeuroSched/blob/main/CERTIFICATE.md"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-[#FF5A00] transition-colors flex items-center gap-1 text-[#FF5A00] font-bold"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Project Certificate</span>
+          </a>
+          <span className="text-[#333333]">|</span>
+          <a
+            href="https://github.com/mantisdarling/NeuroSched/blob/main/LICENSE"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-[#FF5A00] transition-colors"
+          >
+            MIT License
+          </a>
         </div>
 
       </div>
