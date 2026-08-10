@@ -123,30 +123,25 @@ _start:
     movl    $stack_top, %esp
 
     /* Step 2: Enable the x87 FPU.
-     * By default the FPU may be disabled (CR0.EM=1 means emulate, which
-     * causes #NM on any FP instruction). We clear EM, set MP (monitor
-     * coprocessor), clear TS (task-switched flag), and initialize the FPU.
-     *
-     * This is safe here because:
-     *  - Our kernel is single-tasking (simulation loop, no preemptive scheduling).
-     *  - No FPU state context-switching is needed.
-     *  - We need float arithmetic for neural network inference.
+     * Use ECX (not EAX) so we preserve EAX which holds the Multiboot magic.
+     * Clear EM (bit 2): use hardware FPU, no emulation trap.
+     * Set  MP (bit 1): monitor coprocessor (required with hardware FPU).
+     * Clear TS (bit 3): no task-switch FPU fault needed.
      */
-    movl    %cr0, %eax
-    andl    $~(1 << 2), %eax        /* Clear EM (bit 2): hardware FPU, no emulation */
-    orl     $(1 << 1), %eax         /* Set  MP (bit 1): monitor coprocessor         */
-    andl    $~(1 << 3), %eax        /* Clear TS (bit 3): no task-switch FPU fault   */
-    movl    %eax, %cr0
+    movl    %cr0, %ecx
+    andl    $~(1 << 2), %ecx        /* Clear EM                                     */
+    orl     $(1 << 1), %ecx         /* Set  MP                                      */
+    andl    $~(1 << 3), %ecx        /* Clear TS                                     */
+    movl    %ecx, %cr0
     fninit                          /* Initialize FPU control/status/tag words      */
 
-    /* Step 3: Push Multiboot2 arguments for kernel_main.
-     * C calling convention (cdecl): push right-to-left.
-     * kernel_main(uint32_t magic, void *mbi_addr)
-     *   → push EBX (mbi_addr) second, EAX (magic) first from the perspective
-     *     of push order: push last arg first.
+    /* Step 3: Push Multiboot arguments for kernel_main (cdecl, right-to-left).
+     * EAX = Multiboot magic (preserved across steps 1 and 2 above)
+     * EBX = MBI address    (preserved in EDI, never touched by FPU code)
      */
-    pushl   %ebx                    /* arg2: Multiboot2 Information Structure ptr */
-    pushl   %eax                    /* arg1: Multiboot2 magic value               */
+    pushl   %ebx                    /* arg2: Multiboot Information Structure ptr    */
+    pushl   %eax                    /* arg1: Multiboot magic (intact)               */
+
 
     /* Step 4: Call the C kernel entry point. */
     call    kernel_main
